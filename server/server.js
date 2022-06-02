@@ -4,14 +4,21 @@ const db_interface = require('./dao')
 const morgan = require('morgan')
 const dayjs = require('dayjs')
 const PORT = 3001;
+const cors = require('cors');
 
 app = new express();
 app.use(morgan('dev'));
 app.use(bp.json());
 app.use(bp.urlencoded({ extended: true }));
 
+const corsOptions = {
+    origin: 'http://localhost:3000',
+    optionsSuccessStatus: 200
+}
+
+app.use(cors(corsOptions));
+
 app.get('/api/films', async (_, res) => {
-    console.log(':: ' + 'hello' + ' ::');
     let result;
     try {
         result = await db_interface.list_films();
@@ -63,7 +70,7 @@ app.get('/api/films/favorite', async (req, res) => {
 
 });
 
-app.get('/api/films/best_rated', async (req, res) => {
+app.get('/api/films/bestRated', async (req, res) => {
 
     let result;
     try {
@@ -81,7 +88,7 @@ app.get('/api/films/best_rated', async (req, res) => {
 
 });
 
-app.get('/api/films/seen_last_month', async (req, res) => {
+app.get('/api/films/seenLastMonth', async (req, res) => {
 
     let result;
     try {
@@ -118,7 +125,7 @@ app.get('/api/films/unseen', async (req, res) => {
 });
 
 app.get('/api/films/:id', async (req, res) => {
-    //TODO: implement 404
+
 
     const id = req.params.id
 
@@ -134,6 +141,11 @@ app.get('/api/films/:id', async (req, res) => {
             return res.status(500).end()
         }
     }
+
+    if (result === undefined) {
+        return res.status(404).end();
+    }
+
     return res.status(200).json(result);
 
 })
@@ -176,7 +188,7 @@ app.put('/api/films/:id', async (req, res) => {
 
 })
 
-app.put('/api/films/:id/favourite', async (req, res) => {
+app.put('/api/films/:id/favorite', async (req, res) => {
     // TODO: implement 404, 422
     const film_id = req.params.id;
     const favourite = req.body.favorite;

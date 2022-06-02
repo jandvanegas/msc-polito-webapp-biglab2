@@ -101,15 +101,17 @@ class DbInterface {
                     return;
                 }
 
-                const film = {
-                    id: row.id,
-                    title: row.title,
-                    favorite: row.favorite,
-                    watchDate: dayjs(row.watchdate),
-                    Rating: row.rating
-                };
+                if (row !== undefined) {
+                    return {
+                        id: row.id,
+                        title: row.title,
+                        favorite: row.favorite,
+                        watchDate: dayjs(row.watchdate),
+                        Rating: row.rating
+                    };
+                }
 
-                resolve(film);
+                resolve(undefined);
             });
         });
     }
