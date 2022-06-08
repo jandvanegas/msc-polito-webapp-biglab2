@@ -1,12 +1,11 @@
 # BigLab 2 - Class: 2022 [WA1-AJ/WA1-KZ]
 
-## Team name: TEAM_NAME
+## Team name: ReactDevs
 
-Team members:
-* s123456 LASTNAME FIRSTNAME
-* s123456 LASTNAME FIRSTNAME 
-* s123456 LASTNAME FIRSTNAME
-* s123456 LASTNAME FIRSTNAME (delete line if not needed)
+* s301240 PERUGINI ALBERTO
+* s302339 GEMMA
+* s294633 KHATER AHMEND
+* s298351 VANEGAS JUAN
 
 ## Instructions
 
@@ -36,10 +35,161 @@ If you decide to add additional users, please remember to add them to this table
 
 ## List of APIs offered by the server
 
-Provide a short description for API with the required parameters, follow the proposed structure.
+### **_List all films_**
 
-* [HTTP Method] [URL, with any parameter]
-* [One-line about what this API is doing]
-* [Sample request, with body (if any)]
-* [Sample response, with body (if any)]
-* [Error responses, if any]
+GET `/api/films`
+
+* Retrieve a list of all the films
+* Request body: _None_
+* Response: `200 OK` (success).
+* Response body:
+
+```json
+[
+    {
+        "id": 1,
+        "title": "Pulp Fiction",
+        "favorite": 1,
+        "watchDate": "2022-03-10",
+        "Rating": 5
+    }, 
+    {
+        "id": 2,
+        "title":"21 Grams",
+        "favorite": 1,
+        "watchDate": "2022-03-10",
+        "Rating": 4
+    },
+    ....
+]
+
+```
+
+* Error Responses: `503 Service Unavailable` (database error), `500 Internal server error` (generic server error).
+
+### **_List films by a filter_**
+
+GET `/api/films/:filter`
+
+* Example: /api/films/favorite
+* Retrieve a list of all the films that fulfill a given filter
+* Request body: _None_
+* Response: `200 OK` (success).
+* Response body:
+
+```json
+[
+    {
+        "id": 1,
+        "title": "Pulp Fiction",
+        "favorite": 1,
+        "watchDate": "2022-03-10",
+        "Rating": 5
+    }, 
+    {
+        "id": 2,
+        "title":"21 Grams",
+        "favorite": 1,
+        "watchDate": "2022-03-10",
+        "Rating": 4
+    },
+    ....
+]
+```
+
+* Error Responses: `503 Service Unavailable` (database error), `500 Internal server error` (generic server error).
+
+### _Get film by ID_
+
+GET `/api/films/:id`
+
+* Example: `/api/films/2`
+* Retrieve a film, given its “id”.
+* Request body: _None_
+* Response: `200 OK` (success).
+* Response body:
+
+```json
+{
+    "id": 2,
+    "title":"21 Grams",
+    "favorite": 1,
+    "watchDate": "2022-03-10",
+    "Rating": 4
+}  
+```
+
+* Error Responses: `404 Not found` (id not found) , `503 Service Unavailable` (database error), `500 Internal server error` (Database error).
+
+### **_Add a new film_**
+
+POST `/api/films`
+
+* Create a new film, by providing all relevant information – except the “id” that will be
+automatically assigned by the back-end.
+* Request body:
+
+```json
+{
+    "title":"The matrix",
+    "favorite": 1,
+    "watchDate": "2022-03-10",
+    "Rating": 5
+}
+```
+
+* Response: `201 Created` (success).
+* Response body: _None_
+* Error Responses: `422 Unprocessable Entity` (validation of data faild), `503 Service Unavailable` (database error), `500 Internal Server Error` (generic error).
+
+### **_Edit film_**
+
+PUT `/api/films/:id`
+
+* Example: `/api/films/3`
+* Update an existing film, by providing all the relevant information, i.e., all the properties except
+the “id” will overwrite the current properties of the existing film. The “id” will not change after
+the update.
+* Request body:
+
+```json
+{
+    "title":"The matrix",
+    "favorite": 1,
+    "watchDate": "2022-03-10",
+    "Rating": 5
+}
+```
+
+Response: `200 OK` (success).
+Response body: _None_
+Error Responses: `404 Not found` (film "id" not found), `422 Unprocessable Entity` (validation of request body fails), `503 Service Unavailable` (database error), `500 Internal server error` (generic error).
+
+### **_Set film as favorite/unfavorite_**
+
+PUT `/api/films/:id/favorite`
+
+* Example: `/api/films/2`
+* Mark an existing film as favorite(true = 1)/unfavorite(false = 0).
+* Request body :
+
+```json
+{
+    "favorite": 1
+}
+```
+
+* Response: `200 OK` (success).
+* Response body: _None_
+* Error Responses: `404 Not found` (film id not found), `422 Unprocessable Entity` (validation of request body fails), `503 Service Unavailable` (database error), `500 Internal server error` (generic error).
+
+### **_Delete a film_**
+
+DELETE `/api/films/:id`
+
+* Example: `/api/films/3`
+* Delete an existing film, given its “id”.
+* Request body: _None_
+* Response: `204 No content` (success).
+* Response body: _None_
+* Error Responses: `404 Not found` (film id not found), `503 Service Unavailable` (database error), `500 Internal server error` (generic error).
