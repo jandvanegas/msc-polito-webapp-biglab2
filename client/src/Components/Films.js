@@ -6,7 +6,7 @@ import dayjs from 'dayjs';
 
 import API from '../API'
 import { useLocation } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 
 function Films(props) {
 

@@ -35,11 +35,13 @@ If you decide to add additional users, please remember to add them to this table
 
 ## List of APIs offered by the server
 
-### **_List all films_**
+### **_List films_**
 
-GET `/api/films`
+GET `/api/films` `?filter=`
 
-* Retrieve a list of all the films
+* Retrieve a list of all the films or filtered if filter is send
+* Query parameters: 
+  * filter: `all`, `favorite`, `bestRated`, `seenLastMonth`, `unseen`
 * Request body: _None_
 * Response: `200 OK` (success).
 * Response body:
@@ -49,16 +51,16 @@ GET `/api/films`
     {
         "id": 1,
         "title": "Pulp Fiction",
-        "favorite": 1,
+        "favorite": true,
         "watchDate": "2022-03-10",
-        "Rating": 5
+        "rating": 5
     }, 
     {
         "id": 2,
         "title":"21 Grams",
-        "favorite": 1,
+        "favorite": false,
         "watchDate": "2022-03-10",
-        "Rating": 4
+        "rating": 4
     },
     ....
 ]
@@ -66,39 +68,7 @@ GET `/api/films`
 ```
 
 * Error Responses: `503 Service Unavailable` (database error), `500 Internal server error` (generic server error).
-
-### **_List films by a filter_**
-
-GET `/api/films/:filter`
-
-* Example: /api/films/favorite
-* Retrieve a list of all the films that fulfill a given filter
-* Request body: _None_
-* Response: `200 OK` (success).
-* Response body:
-
-```json
-[
-    {
-        "id": 1,
-        "title": "Pulp Fiction",
-        "favorite": 1,
-        "watchDate": "2022-03-10",
-        "Rating": 5
-    }, 
-    {
-        "id": 2,
-        "title":"21 Grams",
-        "favorite": 1,
-        "watchDate": "2022-03-10",
-        "Rating": 4
-    },
-    ....
-]
-```
-
-* Error Responses: `503 Service Unavailable` (database error), `500 Internal server error` (generic server error).
-
+* 
 ### _Get film by ID_
 
 GET `/api/films/:id`
@@ -113,9 +83,9 @@ GET `/api/films/:id`
 {
     "id": 2,
     "title":"21 Grams",
-    "favorite": 1,
+    "favorite": true,
     "watchDate": "2022-03-10",
-    "Rating": 4
+    "rating": 4
 }  
 ```
 
@@ -132,9 +102,9 @@ automatically assigned by the back-end.
 ```json
 {
     "title":"The matrix",
-    "favorite": 1,
+    "favorite": true,
     "watchDate": "2022-03-10",
-    "Rating": 5
+    "rating": 5
 }
 ```
 

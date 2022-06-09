@@ -9,26 +9,27 @@ class DbInterface {
 
     list_films() {
         return new Promise((resolve, reject) => {
-
-            const sql = `
-                SELECT * FROM films`;
-
+            const sql = ` SELECT *
+                          FROM films`;
             db.all(sql, [], (err, rows) => {
-
                 if (err) {
                     reject(err);
                     return;
                 }
-
-                const films = rows.map(row => ({
-                    id: row.id,
-                    title: row.title,
-                    favorite: row.favorite,
-                    watchDate: dayjs(row.watchdate),
-                    Rating: row.rating
-                }));
-
+                const films = this.map_films(rows);
                 resolve(films);
+            });
+        });
+    }
+
+    map_films(rows) {
+        return  rows.map(row => {
+            return ({
+                id: row.id,
+                title: row.title,
+                favorite: row.favorite === 1,
+                watchDate: dayjs(row.watchdate),
+                rating: row.rating
             });
         });
     }
@@ -37,51 +38,37 @@ class DbInterface {
         return new Promise((resolve, reject) => {
 
             const sql = `
-                SELECT * FROM films
+                SELECT *
+                FROM films
                 WHERE favorite = 1`;
 
             db.all(sql, [], (err, rows) => {
-
                 if (err) {
                     reject(err);
                     return;
                 }
-
-                const films = rows.map(row => ({
-                    id: row.id,
-                    title: row.title,
-                    favorite: row.favorite,
-                    watchDate: dayjs(row.watchdate),
-                    Rating: row.rating
-                }));
-
+                const films = this.map_films(rows);
                 resolve(films);
             });
         });
     }
 
+
+
     list_best_rated_films() {
         return new Promise((resolve, reject) => {
 
             const sql = `
-                SELECT * FROM films
+                SELECT *
+                FROM films
                 WHERE rating = 5`;
 
             db.all(sql, [], (err, rows) => {
-
                 if (err) {
                     reject(err);
                     return;
                 }
-
-                const films = rows.map(row => ({
-                    id: row.id,
-                    title: row.title,
-                    favorite: row.favorite,
-                    watchDate: dayjs(row.watchdate),
-                    Rating: row.rating
-                }));
-
+                const films = this.map_films(rows);
                 resolve(films);
             });
         });
@@ -91,26 +78,24 @@ class DbInterface {
         return new Promise((resolve, reject) => {
 
             const sql = `
-                SELECT * FROM films
+                SELECT *
+                FROM films
                 WHERE id = ?`;
 
             db.get(sql, [id], (err, row) => {
-
                 if (err) {
                     reject(err);
                     return;
                 }
-
                 if (row !== undefined) {
                     return {
                         id: row.id,
                         title: row.title,
-                        favorite: row.favorite,
+                        favorite: row.favorite === 1,
                         watchDate: dayjs(row.watchdate),
-                        Rating: row.rating
+                        rating: row.rating
                     };
                 }
-
                 resolve(undefined);
             });
         });
@@ -125,12 +110,10 @@ class DbInterface {
 
             // TODO: change when implementing users
             db.run(sql, [title, favorite, watchdate, rating, 1], (err) => {
-
                 if (err) {
                     reject(err);
                     return;
                 }
-
                 resolve(true);
             });
         });
@@ -141,11 +124,10 @@ class DbInterface {
 
             const sql = `
                 UPDATE films
-                SET 
-                    title = ?, 
-                    favorite = ?, 
-                    watchdate = ?, 
-                    rating = ?
+                SET title     = ?,
+                    favorite  = ?,
+                    watchdate = ?,
+                    rating    = ?
                 WHERE id = ?;`
 
             // TODO: change when implementing users
@@ -165,8 +147,7 @@ class DbInterface {
 
             const sql = `
                 UPDATE films
-                SET 
-                    favorite = ?
+                SET favorite = ?
                 WHERE id = ?;`
 
             // TODO: change when implementing users
@@ -185,7 +166,8 @@ class DbInterface {
         return new Promise((resolve, reject) => {
 
             const sql = `
-                DELETE FROM films
+                DELETE
+                FROM films
                 WHERE id = ?;`
 
             // TODO: change when implementing users
