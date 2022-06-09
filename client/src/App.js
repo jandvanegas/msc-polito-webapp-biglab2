@@ -13,16 +13,20 @@ import API from './API'
 function App() {
     const [films, setFilms] = useState([]);
 
+    const getFilms = async () => {
+        const films = await API.get_all_films();
+        setFilms(films);
+    }
+
     useEffect(() => {
-        const get_films = async () => {
-            const films = await API.get_all_films();
-            setFilms(films);
-        }
-        get_films();
+        getFilms();
     }, [])
 
     const addFilm = (film) => {
+        film.status = 'added';
         setFilms((oldFilms) => [...oldFilms, film]);
+        console.log(film)
+        API.addFilm(film).then(() => getFilms())
     };
 
     const deleteFilm = (filmId) => {

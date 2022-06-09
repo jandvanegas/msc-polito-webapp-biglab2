@@ -56,7 +56,7 @@ app.get('/api/films', async (req, res) => {
     const response = result.map(film => {
         return {
             ...film,
-            watchDate: film.watchDate.isValid() ? film.format("YYYY-MM-DD") : null
+            watchDate: film.watchDate.isValid() ? film.watchDate.format("YYYY-MM-DD") : null
         }
     })
     return res.status(200).json(response);
@@ -82,7 +82,7 @@ app.get('/api/films/:id', async (req, res) => {
     const response = result.map(film => {
         return {
             ...film,
-            watchDate: film.watchDate.isValid() ? film.format("YYYY-MM-DD") : null
+            watchDate: film.watchDate.isValid() ? film.watchDate.format("YYYY-MM-DD") : null
         }
     })
     return res.status(200).json(response);
