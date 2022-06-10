@@ -29,8 +29,39 @@ const addFilm = async (film) => {
         body: JSON.stringify({
             title: film.title,
             favorite: film.favorite,
-            watchDate: film.watchDate.isValid() ? film.watchDate.format('YYYY-MM-DD'): null,
+            watchDate: film.watchDate.isValid() ? film.watchDate.format('YYYY-MM-DD') : null,
             rating: film.rating,
+        })
+    })
+    if (!response.ok) {
+        throw await response.json()
+    }
+}
+
+const editFilm = async (film) => {
+    const url = `${API_URL}/films/${film.id}`;
+    const response = await fetch(url, {
+        method: 'PUT',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            title: film.title,
+            favorite: film.favorite,
+            watchDate: film.watchDate.isValid() ? film.watchDate.format('YYYY-MM-DD') : null,
+            rating: film.rating,
+        })
+    })
+    if (!response.ok) {
+        throw await response.json()
+    }
+}
+
+const patchFavorite = async (film) => {
+    const url = `${API_URL}/films/${film.id}`;
+    const response = await fetch(url, {
+        method: 'PATCH',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            favorite: film.favorite,
         })
     })
     if (!response.ok) {
@@ -48,5 +79,5 @@ const deleteFilm = async (filmId) => {
         throw await response.json()
     }
 };
-const API = {get_all_films, get_filtered_films, addFilm, deleteFilm};
+const API = {get_all_films, get_filtered_films, addFilm, deleteFilm, editFilm, patchFavorite};
 export default API;

@@ -25,7 +25,9 @@ function FilmForm(props) {
             watchDate: dayjs(watchDate),
             rating: rating,
         };
-
+        if (filmId !== undefined) {
+            film.id = filmId
+        }
         event.preventDefault();
         editableFilm ? props.editFilm(film) : props.addFilm(film);
         navigate('/');

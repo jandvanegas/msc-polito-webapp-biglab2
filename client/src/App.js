@@ -54,8 +54,25 @@ function App() {
                 else return oldFilm;
             });
         });
+        API.editFilm(film).then(() => getFilms())
     };
 
+    const patchFavorite = (film) => {
+        setFilms((oldFilms) => {
+            return oldFilms.map((oldFilm) => {
+                if (oldFilm.id === film.id)
+                    return {
+                        id: film.id,
+                        title: film.title,
+                        favorite: film.favorite,
+                        watchDate: film.watchDate,
+                        rating: film.rating,
+                    };
+                else return oldFilm;
+            });
+        });
+        API.patchFavorite(film).then(() => getFilms())
+    };
     return (
         <BrowserRouter>
             <Routes>
@@ -67,6 +84,7 @@ function App() {
                                 films={films}
                                 deleteFilm={deleteFilm}
                                 editFilm={editFilm}
+                                patchFavorite={patchFavorite}
                                 setFilms={setFilms}
                                 filterSelected="All"
                             />
@@ -79,6 +97,7 @@ function App() {
                                 films={films}
                                 deleteFilm={deleteFilm}
                                 editFilm={editFilm}
+                                patchFavorite={patchFavorite}
                                 filterSelected="All"
                                 setFilms={setFilms}
                             />
@@ -91,6 +110,7 @@ function App() {
                                 films={films}
                                 deleteFilm={deleteFilm}
                                 editFilm={editFilm}
+                                patchFavorite={patchFavorite}
                                 filterSelected="Favorite"
                                 setFilms={setFilms}
                             />
@@ -103,6 +123,7 @@ function App() {
                                 films={films}
                                 deleteFilm={deleteFilm}
                                 editFilm={editFilm}
+                                patchFavorite={patchFavorite}
                                 filterSelected="Best Rated"
                                 setFilms={setFilms}
                             />
@@ -115,6 +136,7 @@ function App() {
                                 films={films}
                                 deleteFilm={deleteFilm}
                                 editFilm={editFilm}
+                                patchFavorite={patchFavorite}
                                 filterSelected="Seen Last Month"
                                 setFilms={setFilms}
                             />
@@ -127,6 +149,7 @@ function App() {
                                 films={films}
                                 deleteFilm={deleteFilm}
                                 editFilm={editFilm}
+                                patchFavorite={patchFavorite}
                                 filterSelected="Unseen"
                                 setFilms={setFilms}
                             />

@@ -137,10 +137,10 @@ Error Responses: `404 Not found` (film "id" not found), `422 Unprocessable Entit
 
 ### **_Set film as favorite/unfavorite_**
 
-PUT `/api/films/:id/favorite`
+PATCH `/api/films/:id`
 
 * Example: `/api/films/2`
-* Mark an existing film as favorite(true = 1)/unfavorite(false = 0).
+* Patch a film. The only film available to patch is favorite. 
 * Request body :
 
 ```json

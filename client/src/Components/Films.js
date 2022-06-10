@@ -11,16 +11,16 @@ import {useEffect} from 'react';
 function Films(props) {
 
     let location = useLocation();
+    const setFilms = props.setFilms
 
     useEffect(() => {
         const get_filtered_films = async () => {
             const filter = location.pathname.substring(1) !== '' ? location.pathname.substring(1) : 'all'
-            console.log(location.pathname.substring(1) === '')
             const films = await API.get_filtered_films(filter)
-            props.setFilms(films);
+            setFilms(films);
         }
         get_filtered_films();
-    }, [location])
+    }, [location, setFilms])
 
     return (
         <Table striped hover>
@@ -36,7 +36,12 @@ function Films(props) {
             <tbody>
             {props.films
                 .map((film) => (
-                    <FilmRow film={film} key={film.id} deleteFilm={props.deleteFilm}/>
+                    <FilmRow film={film}
+                             patchFavorite={props.patchFavorite}
+                             key={film.id}
+                             deleteFilm={props.deleteFilm}
+                             editFilm={props.editFilm}
+                    />
                 ))}
             </tbody>
         </Table>
@@ -46,7 +51,7 @@ function Films(props) {
 function FilmRow(props) {
     return (
         <tr>
-            <FilmData film={props.film}></FilmData>
+            <FilmData film={props.film} patchFavorite={props.patchFavorite} editFilm={props.editFilm}></FilmData>
             <FilmAction deleteFilm={props.deleteFilm} film={props.film}/>
         </tr>
     );
@@ -60,7 +65,13 @@ function FilmData(props) {
                 {props.film.title}
             </td>
             <td>
-                <CheckBox favorite={props.film.favorite}/>
+                <CheckBox
+                    editable={true}
+                    value={props.film.favorite}
+                    setValue={(newValue) => {
+                        props.patchFavorite({...props.film, favorite: newValue});
+                    }}
+                />
             </td>
             <td>
                 {dayjs(props.film.watchDate).isValid()
@@ -68,7 +79,7 @@ function FilmData(props) {
                     : ''}
             </td>
             <td>
-                <RatingStars rating={props.film.rating}/>
+                <RatingStars rating={props.film.rating} editFilm={props.editFilm} film={props.film} />
             </td>
         </>
     );

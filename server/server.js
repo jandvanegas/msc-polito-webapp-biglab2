@@ -113,11 +113,20 @@ app.post('/api/films', [
 
 })
 
-app.put('/api/films/:id', async (req, res) => {
-    // TODO: implement 404, 422
+app.put('/api/films/:id', [
+    check('id').isInt(),
+    check('title').isString().notEmpty(),
+    check('favorite').isBoolean(),
+    check('watchDate').isDate({format: 'YYYY-MM-DD', strictMode: true}).optional({nullable: true}),
+    check('rating').isInt({min: 0, max: 5}).optional({nullable: true})
+], async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({errors: errors.array()});
+    }
     const film_id = req.params.id;
     try {
-        await db_interface.edit_film(film_id, req.body.title, req.body.favorite, req.body.watchDate, req.body.Rating);
+        await db_interface.edit_film(film_id, req.body.title, req.body.favorite, req.body.watchDate, req.body.rating);
     } catch (err) {
         console.log(err);
         if (err.code && err.code === 'SQLITE_ERROR') {
@@ -131,8 +140,13 @@ app.put('/api/films/:id', async (req, res) => {
 
 })
 
-app.put('/api/films/:id/favorite', async (req, res) => {
-    // TODO: implement 404, 422
+app.patch('/api/films/:id', [
+    check('favorite').isBoolean(),
+], async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({errors: errors.array()});
+    }
     const film_id = req.params.id;
     const favourite = req.body.favorite;
     try {
@@ -145,7 +159,6 @@ app.put('/api/films/:id/favorite', async (req, res) => {
             return res.status(500).end()
         }
     }
-
     return res.status(200).end();
 
 })
