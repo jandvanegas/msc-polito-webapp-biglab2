@@ -1,12 +1,12 @@
-import { Table } from 'react-bootstrap';
-import { CheckBox } from './CheckBox';
+import {Table} from 'react-bootstrap';
+import {CheckBox} from './CheckBox';
 import RatingStars from './RatingStars';
 import FilmAction from './FilmAction';
 import dayjs from 'dayjs';
 
 import API from '../API'
-import { useLocation } from 'react-router-dom';
-import { useEffect } from 'react';
+import {useLocation} from 'react-router-dom';
+import {useEffect} from 'react';
 
 function Films(props) {
 
@@ -14,7 +14,9 @@ function Films(props) {
 
     useEffect(() => {
         const get_filtered_films = async () => {
-            const films = await API.get_filtered_films(location.pathname.substring(1))
+            const filter = location.pathname.substring(1) !== '' ? location.pathname.substring(1) : 'all'
+            console.log(location.pathname.substring(1) === '')
+            const films = await API.get_filtered_films(filter)
             props.setFilms(films);
         }
         get_filtered_films();
@@ -23,19 +25,19 @@ function Films(props) {
     return (
         <Table striped hover>
             <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Title</th>
-                    <th>Favorite</th>
-                    <th>Watch Date</th>
-                    <th>Rating</th>
-                </tr>
+            <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Favorite</th>
+                <th>Watch Date</th>
+                <th>Rating</th>
+            </tr>
             </thead>
             <tbody>
-                {props.films
-                    .map((film) => (
-                        <FilmRow film={film} key={film.id} deleteFilm={props.deleteFilm} />
-                    ))}
+            {props.films
+                .map((film) => (
+                    <FilmRow film={film} key={film.id} deleteFilm={props.deleteFilm}/>
+                ))}
             </tbody>
         </Table>
     );
@@ -45,7 +47,7 @@ function FilmRow(props) {
     return (
         <tr>
             <FilmData film={props.film}></FilmData>
-            <FilmAction deleteFilm={props.deleteFilm} film={props.film} />
+            <FilmAction deleteFilm={props.deleteFilm} film={props.film}/>
         </tr>
     );
 }
@@ -54,11 +56,11 @@ function FilmData(props) {
     return (
         <>
             <td>{props.film.id}</td>
-            <td style={props.film.favorite ? { color: 'red' } : {}}>
+            <td style={props.film.favorite ? {color: 'red'} : {}}>
                 {props.film.title}
             </td>
             <td>
-                <CheckBox favorite={props.film.favorite} />
+                <CheckBox favorite={props.film.favorite}/>
             </td>
             <td>
                 {dayjs(props.film.watchDate).isValid()
@@ -66,7 +68,7 @@ function FilmData(props) {
                     : ''}
             </td>
             <td>
-                <RatingStars rating={props.film.rating} />
+                <RatingStars rating={props.film.rating}/>
             </td>
         </>
     );

@@ -151,7 +151,6 @@ app.put('/api/films/:id/favorite', async (req, res) => {
 })
 
 app.delete('/api/films/:id', async (req, res) => {
-    // TODO: implement 404
     const film_id = req.params.id;
     try {
         await db_interface.delete_film(film_id);

@@ -25,12 +25,19 @@ function App() {
     const addFilm = (film) => {
         film.status = 'added';
         setFilms((oldFilms) => [...oldFilms, film]);
-        console.log(film)
-        API.addFilm(film).then(() => getFilms())
+        API.addFilm(film).then(() => getFilms(setFilms))
     };
 
     const deleteFilm = (filmId) => {
-        setFilms((oldFilms) => oldFilms.filter((film) => film.id !== filmId));
+        setFilms((oldFilms) => {
+            return oldFilms.map(film => {
+               if (film.id === filmId) {
+                   return {...film, state: 'deleted'}
+               }
+               return film;
+            })
+        });
+        API.deleteFilm(filmId).then(() => getFilms())
     };
 
     const editFilm = (film) => {
@@ -60,6 +67,7 @@ function App() {
                                 films={films}
                                 deleteFilm={deleteFilm}
                                 editFilm={editFilm}
+                                setFilms={setFilms}
                                 filterSelected="All"
                             />
                         }
@@ -130,7 +138,7 @@ function App() {
                 <Route
                     path="/add"
                     element={
-                        <FilmForm addFilm={addFilm} nextFilmIndex={films.length + 1}/>
+                        <FilmForm addFilm={addFilm}/>
                     }
                 />
                 <Route path="/edit" element={<EditRoute editFilm={editFilm}/>}>

@@ -12,7 +12,7 @@ const get_all_films = async () => {
 };
 
 const get_filtered_films = async (filter) => {
-    const url = `${API_URL}/films/?filter=${filter}`;
+    const url = `${API_URL}/films?filter=${filter}`;
     const response = await fetch(url);
     const films_json = await response.json();
     if (response.ok) {
@@ -29,7 +29,7 @@ const addFilm = async (film) => {
         body: JSON.stringify({
             title: film.title,
             favorite: film.favorite,
-            watchDate: film.watchDate.format('YYYY-MM-DD'),
+            watchDate: film.watchDate.isValid() ? film.watchDate.format('YYYY-MM-DD'): null,
             rating: film.rating,
         })
     })
@@ -38,5 +38,15 @@ const addFilm = async (film) => {
     }
 }
 
-const API = {get_all_films, get_filtered_films, addFilm};
+const deleteFilm = async (filmId) => {
+    const url = `${API_URL}/films/${filmId}`;
+    const response = await fetch(url, {
+            method: 'DELETE',
+        }
+    );
+    if (!response.ok) {
+        throw await response.json()
+    }
+};
+const API = {get_all_films, get_filtered_films, addFilm, deleteFilm};
 export default API;
