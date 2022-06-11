@@ -25,6 +25,8 @@ function Body(props) {
                         filterSelected={props.filterSelected}
                         deleteFilm={props.deleteFilm}
                         setFilms={props.setFilms}
+                        editFilmFactory={props.editFilmFactory}
+                        patchFavoriteFactory={props.patchFavoriteFactory}
                     />
                     <AddFilm />
                 </Col>
