@@ -2,8 +2,7 @@ const dayjs = require('dayjs')
 const crypto = require('crypto');
 
 
-function dao(db) {
-    let user
+function dao(db, user) {
     const mapFilms = (rows) => {
         return rows.map(row => {
             return ({

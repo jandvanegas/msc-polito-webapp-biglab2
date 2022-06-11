@@ -1,6 +1,6 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
-import {BrowserRouter, Routes, Route} from 'react-router-dom';
+import {BrowserRouter, Routes, Route, Navigate} from 'react-router-dom';
 import DefaultRoute from './Components/DefaultRoute';
 import Home from './Components/Home';
 import FilmForm from './Components/FilmForm';
@@ -9,9 +9,13 @@ import EditRoute from './Components/EditRoute';
 import Body from './Components/Body';
 
 import API from './API'
+import {Container} from "react-bootstrap";
+import {LoginRoute, LogoutButton} from "./Components/Auth";
 
 function App() {
     const [films, setFilms] = useState([]);
+    const [loggedIn, setLoggedIn] = useState(false);
+    const [message, setMessage] = useState('');
 
     const getFilms = async () => {
         const films = await API.get_all_films();
@@ -19,7 +23,33 @@ function App() {
     }
 
     useEffect(() => {
-        getFilms();
+        const checkAuth = async () => {
+            await API.getUserInfo(); // we have the user info here
+            setLoggedIn(true);
+        };
+        checkAuth();
+    }, []);
+
+    const handleLogin = async (credentials) => {
+        try {
+            const user = await API.logIn(credentials);
+            setLoggedIn(true);
+            setMessage({msg: `Welcome, ${user.name}!`, type: 'success'});
+        } catch (err) {
+            console.log(err);
+            setMessage({msg: err, type: 'danger'});
+        }
+    };
+
+    const handleLogout = async () => {
+        await API.logOut();
+        setLoggedIn(false);
+        setFilms([]);
+        setMessage('');
+    };
+
+    useEffect(() => {
+        if (loggedIn) getFilms();
     }, [])
 
     const addFilm = (film) => {
@@ -31,10 +61,10 @@ function App() {
     const deleteFilm = (filmId) => {
         setFilms((oldFilms) => {
             return oldFilms.map(film => {
-               if (film.id === filmId) {
-                   return {...film, state: 'deleted'}
-               }
-               return film;
+                if (film.id === filmId) {
+                    return {...film, state: 'deleted'}
+                }
+                return film;
             })
         });
         API.deleteFilm(filmId).then(() => getFilms())
@@ -82,105 +112,116 @@ function App() {
     const editFilm = editFilmFactory(getFilms)
 
     return (
-        <BrowserRouter>
-            <Routes>
-                <Route path="/" element={<Home/>}>
-                    <Route
-                        index
-                        element={
-                            <Body
-                                films={films}
-                                deleteFilm={deleteFilm}
-                                editFilmFactory={editFilmFactory}
-                                patchFavoriteFactory={patchFavoriteFactory}
-                                setFilms={setFilms}
-                                filterSelected="All"
-                            />
-                        }
-                    />
-                    <Route
-                        path="all"
-                        element={
-                            <Body
-                                films={films}
-                                deleteFilm={deleteFilm}
-                                editFilmFactory={editFilmFactory}
-                                patchFavoriteFactory={patchFavoriteFactory}
-                                filterSelected="All"
-                                setFilms={setFilms}
-                            />
-                        }
-                    />
-                    <Route
-                        path="favorite"
-                        element={
-                            <Body
-                                films={films}
-                                deleteFilm={deleteFilm}
-                                editFilmFactory={editFilmFactory}
-                                patchFavoriteFactory={patchFavoriteFactory}
-                                filterSelected="Favorite"
-                                setFilms={setFilms}
-                            />
-                        }
-                    />
-                    <Route
-                        path="bestRated"
-                        element={
-                            <Body
-                                films={films}
-                                deleteFilm={deleteFilm}
-                                editFilmFactory={editFilmFactory}
-                                patchFavoriteFactory={patchFavoriteFactory}
-                                filterSelected="Best Rated"
-                                setFilms={setFilms}
-                            />
-                        }
-                    />
-                    <Route
-                        path="seenLastMonth"
-                        element={
-                            <Body
-                                films={films}
-                                deleteFilm={deleteFilm}
-                                editFilmFactory={editFilmFactory}
-                                patchFavoriteFactory={patchFavoriteFactory}
-                                filterSelected="Seen Last Month"
-                                setFilms={setFilms}
-                            />
-                        }
-                    />
-                    <Route
-                        path="unseen"
-                        element={
-                            <Body
-                                films={films}
-                                deleteFilm={deleteFilm}
-                                editFilmFactory={editFilmFactory}
-                                patchFavoriteFactory={patchFavoriteFactory}
-                                filterSelected="Unseen"
-                                setFilms={setFilms}
-                            />
-                        }
-                    />
-                </Route>
+        <Container>
+            {loggedIn && <LogoutButton logout={handleLogout}/>}
+            <BrowserRouter>
+                <Routes>
+                    <Route path='/login' element={
+                        loggedIn ? <Navigate replace to='/'/> : <LoginRoute login={handleLogin}/>
+                    }/>
+                    <Route path="/" element={
+                        loggedIn ? <Home/> : <Navigate replace to='/login'/>
+                    }>
+                        <Route
+                            index
+                            element={
+                                loggedIn ? <Body
+                                    films={films}
+                                    deleteFilm={deleteFilm}
+                                    editFilmFactory={editFilmFactory}
+                                    patchFavoriteFactory={patchFavoriteFactory}
+                                    setFilms={setFilms}
+                                    filterSelected="All"
+                                /> : <Navigate replace to='/login'/>
+                            }
+                        />
+                        <Route
+                            path="all"
+                            element={
+                                loggedIn ? <Body
+                                    films={films}
+                                    deleteFilm={deleteFilm}
+                                    editFilmFactory={editFilmFactory}
+                                    patchFavoriteFactory={patchFavoriteFactory}
+                                    filterSelected="All"
+                                    setFilms={setFilms}
+                                /> : <Navigate replace to='/login'/>
+                            }
+                        />
+                        <Route
+                            path="favorite"
+                            element={
+                                loggedIn ? <Body
+                                    films={films}
+                                    deleteFilm={deleteFilm}
+                                    editFilmFactory={editFilmFactory}
+                                    patchFavoriteFactory={patchFavoriteFactory}
+                                    filterSelected="Favorite"
+                                    setFilms={setFilms}
+                                /> : <Navigate replace to='/login'/>
+                            }
+                        />
+                        <Route
+                            path="bestRated"
+                            element={
+                                loggedIn ? <Body
+                                    films={films}
+                                    deleteFilm={deleteFilm}
+                                    editFilmFactory={editFilmFactory}
+                                    patchFavoriteFactory={patchFavoriteFactory}
+                                    filterSelected="Best Rated"
+                                    setFilms={setFilms}
+                                /> : <Navigate replace to='/login'/>
+                            }
+                        />
+                        <Route
+                            path="seenLastMonth"
+                            element={
+                                loggedIn ? <Body
+                                    films={films}
+                                    deleteFilm={deleteFilm}
+                                    editFilmFactory={editFilmFactory}
+                                    patchFavoriteFactory={patchFavoriteFactory}
+                                    filterSelected="Seen Last Month"
+                                    setFilms={setFilms}
+                                /> : <Navigate replace to='/login'/>
+                            }
+                        />
+                        <Route
+                            path="unseen"
+                            element={
+                                loggedIn ? <Body
+                                    films={films}
+                                    deleteFilm={deleteFilm}
+                                    editFilmFactory={editFilmFactory}
+                                    patchFavoriteFactory={patchFavoriteFactory}
+                                    filterSelected="Unseen"
+                                    setFilms={setFilms}
+                                /> : <Navigate replace to='/login'/>
+                            }
+                        />
+                    </Route>
 
-                <Route path="*" element={<DefaultRoute/>}/>
-                <Route
-                    path="/add"
-                    element={
-                        <FilmForm addFilm={addFilm}/>
-                    }
-                />
-                <Route path="/edit" element={<EditRoute editFilm={editFilm}/>}>
-                    <Route index element={<h2>Please, Specify film id in the URL</h2>}/>
+                    <Route path="*" element={<DefaultRoute/>}/>
                     <Route
-                        path=":filmId"
-                        element={<FilmForm films={films} editFilm={editFilm}/>}
+                        path="/add"
+                        element={
+                            loggedIn ? <FilmForm addFilm={addFilm}/> : <Navigate replace to='/login'/>
+                        }
                     />
-                </Route>
-            </Routes>
-        </BrowserRouter>
+                    <Route path="/edit" element={<EditRoute editFilm={editFilm}/>}>
+                        <Route index element={<h2>Please, Specify film id in the URL</h2>}/>
+                        <Route
+                            path=":filmId"
+                            element={
+                                loggedIn ? <FilmForm films={films} editFilm={editFilm}/> :
+                                    <Navigate replace to='/login'/>
+                            }
+                        />
+                    </Route>
+                </Routes>
+            </BrowserRouter>
+        </Container>
     );
 }
 

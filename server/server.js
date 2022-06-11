@@ -19,7 +19,7 @@ app.use(bp.urlencoded({extended: true}));
 const db = new sqlite.Database('films.db', (err) => {
     if (err) throw err;
 });
-const myDao = dao(db);
+const initDao = dao(db);
 
 const corsOptions = {
     origin: 'http://localhost:3000',
@@ -29,8 +29,8 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 passport.use(new LocalStrategy(async function verify(username, password, cb) {
-    const user = await myDao.getUser(username, password)
-    if(!user) return cb(null, false, 'Incorrect username or password.');
+    const user = await initDao.getUser(username, password)
+    if (!user) return cb(null, false, 'Incorrect username or password.');
     return cb(null, user);
 }));
 passport.serializeUser(function (user, cb) {
@@ -40,7 +40,7 @@ passport.deserializeUser(function (user, cb) { // this user is id + email + name
     return cb(null, user);
 });
 const isLoggedIn = (req, res, next) => {
-    if(req.isAuthenticated()) {
+    if (req.isAuthenticated()) {
         return next();
     }
     return res.status(401).json({error: 'Not authorized'});
@@ -57,9 +57,9 @@ app.post('/api/sessions', passport.authenticate('local'), (req, res) => {
 });
 
 app.get('/api/sessions/current', (req, res) => {
-    if(req.isAuthenticated()) {
-        res.json(req.user);}
-    else
+    if (req.isAuthenticated()) {
+        res.json(req.user);
+    } else
         res.status(401).json({error: 'Not authenticated'});
 });
 
@@ -70,7 +70,7 @@ app.delete('/api/sessions/current', (req, res) => {
 });
 
 app.get('/api/films', isLoggedIn, async (req, res) => {
-    myDao.user = req.user
+    const myDao = dao(db, req.user.id)
     let result;
     try {
         switch (req.query.filter) {
@@ -113,8 +113,8 @@ app.get('/api/films', isLoggedIn, async (req, res) => {
     return res.status(200).json(response);
 });
 
-app.get('/api/films/:id', async (req, res) => {
-    myDao.user = req.user
+app.get('/api/films/:id', isLoggedIn, async (req, res) => {
+    const myDao = dao(db, req.user.id)
     const id = req.params.id
     let result;
     try {
@@ -145,8 +145,8 @@ app.post('/api/films', [
     check('favorite').isBoolean(),
     check('watchDate').isDate({format: 'YYYY-MM-DD', strictMode: true}).optional({nullable: true}),
     check('rating').isInt({min: 0, max: 5}).optional({nullable: true})
-], async (req, res) => {
-    myDao.user = req.user
+], isLoggedIn, async (req, res) => {
+    const myDao = dao(db, req.user.id)
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(422).json({errors: errors.array()});
@@ -171,8 +171,8 @@ app.put('/api/films/:id', [
     check('favorite').isBoolean(),
     check('watchDate').isDate({format: 'YYYY-MM-DD', strictMode: true}).optional({nullable: true}),
     check('rating').isInt({min: 0, max: 5}).optional({nullable: true})
-], async (req, res) => {
-    myDao.user = req.user
+], isLoggedIn, async (req, res) => {
+    const myDao = dao(db, req.user.id)
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(422).json({errors: errors.array()});
@@ -195,8 +195,8 @@ app.put('/api/films/:id', [
 
 app.patch('/api/films/:id', [
     check('favorite').isBoolean(),
-], async (req, res) => {
-    myDao.user = req.user
+], isLoggedIn, async (req, res) => {
+    const myDao = dao(db, req.user.id)
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(422).json({errors: errors.array()});
@@ -217,8 +217,8 @@ app.patch('/api/films/:id', [
 
 })
 
-app.delete('/api/films/:id', async (req, res) => {
-    myDao.user = req.user
+app.delete('/api/films/:id', isLoggedIn, async (req, res) => {
+    const myDao = dao(db, req.user.id)
     const film_id = req.params.id;
     try {
         await myDao.deleteFilm(film_id);
