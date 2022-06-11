@@ -9,8 +9,8 @@ import EditRoute from './Components/EditRoute';
 import Body from './Components/Body';
 
 import API from './API'
-import {Container} from "react-bootstrap";
-import {LoginRoute, LogoutButton} from "./Components/Auth";
+import {Alert, Container, Row} from "react-bootstrap";
+import {LoginRoute } from "./Components/Auth";
 
 function App() {
     const [films, setFilms] = useState([]);
@@ -37,7 +37,7 @@ function App() {
             setMessage({msg: `Welcome, ${user.name}!`, type: 'success'});
         } catch (err) {
             console.log(err);
-            setMessage({msg: err, type: 'danger'});
+            setMessage({msg: 'Incorrect user name or password', type: 'danger'});
         }
     };
 
@@ -50,7 +50,7 @@ function App() {
 
     useEffect(() => {
         if (loggedIn) getFilms();
-    }, [])
+    }, [loggedIn])
 
     const addFilm = (film) => {
         film.status = 'added';
@@ -113,14 +113,16 @@ function App() {
 
     return (
         <Container>
-            {loggedIn && <LogoutButton logout={handleLogout}/>}
+            {message && <Row>
+                <Alert variant={message.type} onClose={() => setMessage('')} dismissible>{message.msg}</Alert>
+            </Row> }
             <BrowserRouter>
                 <Routes>
                     <Route path='/login' element={
                         loggedIn ? <Navigate replace to='/'/> : <LoginRoute login={handleLogin}/>
                     }/>
                     <Route path="/" element={
-                        loggedIn ? <Home/> : <Navigate replace to='/login'/>
+                        loggedIn ? <Home handleLogout={handleLogout}/> : <Navigate replace to='/login'/>
                     }>
                         <Route
                             index
