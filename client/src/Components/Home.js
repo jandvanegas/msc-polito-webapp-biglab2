@@ -6,7 +6,7 @@ function Home(props) {
 	const [open, setOpen] = useState(false);
 	return (
 		<div className="App">
-			<Navigation open={open} setOpen={setOpen} />
+			<Navigation open={open} setOpen={setOpen} handleLogout={props.handleLogout}/>
 			<Outlet open={open} />
 		</div>
 	);
