@@ -9,18 +9,19 @@ import {useLocation} from 'react-router-dom';
 import {useEffect} from 'react';
 
 function Films(props) {
-
     let location = useLocation();
-    const setFilms = props.setFilms
+
+    const getFilms = async () => {
+        const filter = location.pathname.substring(1) !== '' ? location.pathname.substring(1) : 'all'
+        const films = await API.get_filtered_films(filter)
+        props.setFilms(films);
+    }
+    const patchFavorite = props.patchFavoriteFactory(getFilms)
+    const editFilm = props.editFilmFactory(getFilms)
 
     useEffect(() => {
-        const get_filtered_films = async () => {
-            const filter = location.pathname.substring(1) !== '' ? location.pathname.substring(1) : 'all'
-            const films = await API.get_filtered_films(filter)
-            setFilms(films);
-        }
-        get_filtered_films();
-    }, [location, setFilms])
+        getFilms();
+    }, [location])
 
     return (
         <Table striped hover>
@@ -37,10 +38,10 @@ function Films(props) {
             {props.films
                 .map((film) => (
                     <FilmRow film={film}
-                             patchFavorite={props.patchFavorite}
+                             patchFavorite={patchFavorite}
                              key={film.id}
                              deleteFilm={props.deleteFilm}
-                             editFilm={props.editFilm}
+                             editFilm={editFilm}
                     />
                 ))}
             </tbody>
@@ -49,8 +50,22 @@ function Films(props) {
 }
 
 function FilmRow(props) {
+    let statusClass = null;
+    switch(props.film.status) {
+        case 'added':
+            statusClass = 'table-success';
+            break;
+        case 'edited':
+            statusClass = 'table-warning';
+            break;
+        case 'deleted':
+            statusClass = 'table-danger';
+            break;
+        default:
+            break;
+    }
     return (
-        <tr>
+        <tr className={statusClass}>
             <FilmData film={props.film} patchFavorite={props.patchFavorite} editFilm={props.editFilm}></FilmData>
             <FilmAction deleteFilm={props.deleteFilm} film={props.film}/>
         </tr>

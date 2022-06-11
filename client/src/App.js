@@ -40,39 +40,47 @@ function App() {
         API.deleteFilm(filmId).then(() => getFilms())
     };
 
-    const editFilm = (film) => {
-        setFilms((oldFilms) => {
-            return oldFilms.map((oldFilm) => {
-                if (oldFilm.id === film.id)
-                    return {
-                        id: film.id,
-                        title: film.title,
-                        favorite: film.favorite,
-                        watchDate: film.watchDate,
-                        rating: film.rating,
-                    };
-                else return oldFilm;
+    const patchFavoriteFactory = (refreshFilms) => {
+        return (film) => {
+            setFilms((oldFilms) => {
+                return oldFilms.map((oldFilm) => {
+                    if (oldFilm.id === film.id)
+                        return {
+                            id: film.id,
+                            title: film.title,
+                            favorite: film.favorite,
+                            watchDate: film.watchDate,
+                            rating: film.rating,
+                            status: 'edited'
+                        };
+                    else return oldFilm;
+                });
             });
-        });
-        API.editFilm(film).then(() => getFilms())
+            API.patchFavorite(film).then(() => refreshFilms())
+        }
     };
 
-    const patchFavorite = (film) => {
-        setFilms((oldFilms) => {
-            return oldFilms.map((oldFilm) => {
-                if (oldFilm.id === film.id)
-                    return {
-                        id: film.id,
-                        title: film.title,
-                        favorite: film.favorite,
-                        watchDate: film.watchDate,
-                        rating: film.rating,
-                    };
-                else return oldFilm;
+    const editFilmFactory = (refreshFilms) => {
+        return (film) => {
+            setFilms((oldFilms) => {
+                return oldFilms.map((oldFilm) => {
+                    if (oldFilm.id === film.id)
+                        return {
+                            id: film.id,
+                            title: film.title,
+                            favorite: film.favorite,
+                            watchDate: film.watchDate,
+                            rating: film.rating,
+                            status: 'edited'
+                        };
+                    else return oldFilm;
+                });
             });
-        });
-        API.patchFavorite(film).then(() => getFilms())
+            API.editFilm(film).then(() => refreshFilms())
+        }
     };
+    const editFilm = editFilmFactory(getFilms)
+
     return (
         <BrowserRouter>
             <Routes>
@@ -83,8 +91,8 @@ function App() {
                             <Body
                                 films={films}
                                 deleteFilm={deleteFilm}
-                                editFilm={editFilm}
-                                patchFavorite={patchFavorite}
+                                editFilmFactory={editFilmFactory}
+                                patchFavoriteFactory={patchFavoriteFactory}
                                 setFilms={setFilms}
                                 filterSelected="All"
                             />
@@ -96,8 +104,8 @@ function App() {
                             <Body
                                 films={films}
                                 deleteFilm={deleteFilm}
-                                editFilm={editFilm}
-                                patchFavorite={patchFavorite}
+                                editFilmFactory={editFilmFactory}
+                                patchFavoriteFactory={patchFavoriteFactory}
                                 filterSelected="All"
                                 setFilms={setFilms}
                             />
@@ -109,8 +117,8 @@ function App() {
                             <Body
                                 films={films}
                                 deleteFilm={deleteFilm}
-                                editFilm={editFilm}
-                                patchFavorite={patchFavorite}
+                                editFilmFactory={editFilmFactory}
+                                patchFavoriteFactory={patchFavoriteFactory}
                                 filterSelected="Favorite"
                                 setFilms={setFilms}
                             />
@@ -122,8 +130,8 @@ function App() {
                             <Body
                                 films={films}
                                 deleteFilm={deleteFilm}
-                                editFilm={editFilm}
-                                patchFavorite={patchFavorite}
+                                editFilmFactory={editFilmFactory}
+                                patchFavoriteFactory={patchFavoriteFactory}
                                 filterSelected="Best Rated"
                                 setFilms={setFilms}
                             />
@@ -135,8 +143,8 @@ function App() {
                             <Body
                                 films={films}
                                 deleteFilm={deleteFilm}
-                                editFilm={editFilm}
-                                patchFavorite={patchFavorite}
+                                editFilmFactory={editFilmFactory}
+                                patchFavoriteFactory={patchFavoriteFactory}
                                 filterSelected="Seen Last Month"
                                 setFilms={setFilms}
                             />
@@ -148,8 +156,8 @@ function App() {
                             <Body
                                 films={films}
                                 deleteFilm={deleteFilm}
-                                editFilm={editFilm}
-                                patchFavorite={patchFavorite}
+                                editFilmFactory={editFilmFactory}
+                                patchFavoriteFactory={patchFavoriteFactory}
                                 filterSelected="Unseen"
                                 setFilms={setFilms}
                             />
