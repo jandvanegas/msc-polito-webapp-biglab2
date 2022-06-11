@@ -1,29 +1,11 @@
-const sqlite = require('sqlite3');
 const dayjs = require('dayjs')
+const crypto = require('crypto');
 
-const db = new sqlite.Database('films.db', (err) => {
-    if (err) throw err;
-});
 
-class DbInterface {
-
-    list_films() {
-        return new Promise((resolve, reject) => {
-            const sql = ` SELECT *
-                          FROM films`;
-            db.all(sql, [], (err, rows) => {
-                if (err) {
-                    reject(err);
-                    return;
-                }
-                const films = this.map_films(rows);
-                resolve(films);
-            });
-        });
-    }
-
-    map_films(rows) {
-        return  rows.map(row => {
+function dao(db) {
+    let user
+    const mapFilms = (rows) => {
+        return rows.map(row => {
             return ({
                 id: row.id,
                 title: row.title,
@@ -34,55 +16,74 @@ class DbInterface {
         });
     }
 
-    list_favorite_films() {
+    const listFilms = () => {
         return new Promise((resolve, reject) => {
-
-            const sql = `
-                SELECT *
-                FROM films
-                WHERE favorite = 1`;
-
-            db.all(sql, [], (err, rows) => {
+            const sql = ` SELECT *
+                          FROM films
+                          WHERE user = ?`;
+            db.all(sql, [user], (err, rows) => {
                 if (err) {
                     reject(err);
                     return;
                 }
-                const films = this.map_films(rows);
+                const films = mapFilms(rows);
                 resolve(films);
             });
         });
     }
 
 
-
-    list_best_rated_films() {
+    const listFavoriteFilms = () => {
         return new Promise((resolve, reject) => {
 
             const sql = `
                 SELECT *
                 FROM films
-                WHERE rating = 5`;
+                WHERE favorite = 1
+                  and user = ?`;
 
-            db.all(sql, [], (err, rows) => {
+            db.all(sql, [user], (err, rows) => {
                 if (err) {
                     reject(err);
                     return;
                 }
-                const films = this.map_films(rows);
+                const films = mapFilms(rows);
                 resolve(films);
             });
         });
     }
 
-    get_film_by_id(id) {
+
+    const listBestRatedFilms = () => {
         return new Promise((resolve, reject) => {
 
             const sql = `
                 SELECT *
                 FROM films
-                WHERE id = ?`;
+                WHERE rating = 5
+                  and user = ?`;
 
-            db.get(sql, [id], (err, row) => {
+            db.all(sql, [user], (err, rows) => {
+                if (err) {
+                    reject(err);
+                    return;
+                }
+                const films = mapFilms(rows);
+                resolve(films);
+            });
+        });
+    }
+
+    const getFilmById = (id) => {
+        return new Promise((resolve, reject) => {
+
+            const sql = `
+                SELECT *
+                FROM films
+                WHERE id = ?
+                  and user = ?`;
+
+            db.get(sql, [id, user], (err, row) => {
                 if (err) {
                     reject(err);
                     return;
@@ -101,15 +102,14 @@ class DbInterface {
         });
     }
 
-    add_film(title, favorite, watchdate, rating) {
+    const addFilm = (title, favorite, watchdate, rating) => {
         return new Promise((resolve, reject) => {
 
             const sql = `
                 INSERT INTO films(title, favorite, watchdate, rating, user)
                 VALUES (?, ?, ?, ?, ?);`
 
-            // TODO: change when implementing users
-            db.run(sql, [title, favorite, watchdate, rating, 1], (err) => {
+            db.run(sql, [title, favorite, watchdate, rating, user], (err) => {
                 if (err) {
                     reject(err);
                     return;
@@ -119,7 +119,7 @@ class DbInterface {
         });
     }
 
-    edit_film(id, title, favorite, watchdate, rating) {
+    const editFilm = (id, title, favorite, watchdate, rating) => {
         return new Promise((resolve, reject) => {
 
             const sql = `
@@ -128,10 +128,10 @@ class DbInterface {
                     favorite  = ?,
                     watchdate = ?,
                     rating    = ?
-                WHERE id = ?;`
+                WHERE id = ?
+                  and user = ?;`
 
-            // TODO: change when implementing users
-            db.run(sql, [title, favorite, watchdate, rating, id], (err) => {
+            db.run(sql, [title, favorite, watchdate, rating, id, user], (err) => {
                 if (err) {
                     reject(err);
                     return;
@@ -142,16 +142,16 @@ class DbInterface {
         });
     }
 
-    set_favourite_film(id, favorite) {
+    const setFavouriteFilm = (id, favorite) => {
         return new Promise((resolve, reject) => {
 
             const sql = `
                 UPDATE films
                 SET favorite = ?
-                WHERE id = ?;`
+                WHERE id = ?
+                  and user = ?;`
 
-            // TODO: change when implementing users
-            db.run(sql, [favorite, id], (err) => {
+            db.run(sql, [favorite, id, user], (err) => {
                 if (err) {
                     reject(err);
                     return;
@@ -162,16 +162,16 @@ class DbInterface {
         });
     }
 
-    delete_film(id) {
+    const deleteFilm = (id) => {
         return new Promise((resolve, reject) => {
 
             const sql = `
                 DELETE
                 FROM films
-                WHERE id = ?;`
+                WHERE id = ?
+                  and user = ?;`
 
-            // TODO: change when implementing users
-            db.run(sql, [id], (err) => {
+            db.run(sql, [id, user], (err) => {
                 if (err) {
                     reject(err);
                     return;
@@ -181,6 +181,57 @@ class DbInterface {
             });
         });
     }
+    const getUser = (email, password) => {
+        return new Promise((resolve, reject) => {
+            const sql = 'SELECT * FROM users WHERE email = ?';
+            db.get(sql, [email], (err, row) => {
+                if (err) {
+                    reject(err);
+                } else if (row === undefined) {
+                    resolve(false);
+                } else {
+                    const user = {id: row.id, username: row.email, name: row.name};
+
+                    crypto.scrypt(password, row.salt, 32, function (err, hashedPassword) {
+                        if (err) reject(err);
+                        if (!crypto.timingSafeEqual(Buffer.from(row.hash, 'hex'), hashedPassword))
+                            resolve(false);
+                        else
+                            resolve(user);
+                    });
+                }
+            });
+        });
+    };
+
+    const getUserById = (id) => {
+        return new Promise((resolve, reject) => {
+            const sql = 'SELECT * FROM users WHERE id = ?';
+            db.get(sql, [id], (err, row) => {
+                if (err) {
+                    reject(err);
+                } else if (row === undefined) {
+                    resolve({error: 'User not found!'});
+                } else {
+                    const user = {id: row.id, username: row.email, name: row.name};
+                    resolve(user);
+                }
+            });
+        });
+    };
+    return {
+        listFilms: listFilms,
+        mapFilms: mapFilms,
+        listFavoriteFilms: listFavoriteFilms,
+        listBestRatedFilms: listBestRatedFilms,
+        getFilmById: getFilmById,
+        addFilm: addFilm,
+        editFilm: editFilm,
+        setFavoriteFilm: setFavouriteFilm,
+        deleteFilm: deleteFilm,
+        getUser: getUser,
+        getUserById: getUserById,
+    }
 }
 
-module.exports = new DbInterface();
+module.exports = {dao};
