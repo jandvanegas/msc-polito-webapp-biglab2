@@ -58,17 +58,19 @@ function App() {
         API.addFilm(film).then(() => getFilms(setFilms))
     };
 
-    const deleteFilm = (filmId) => {
-        setFilms((oldFilms) => {
-            return oldFilms.map(film => {
-                if (film.id === filmId) {
-                    return {...film, state: 'deleted'}
-                }
-                return film;
-            })
-        });
-        API.deleteFilm(filmId).then(() => getFilms())
-    };
+    const deleteFilmFactory = (refreshFilms) => {
+        return (filmId) => {
+            setFilms((oldFilms) => {
+                return oldFilms.map(film => {
+                    if (film.id === filmId) {
+                        return {...film, state: 'deleted'}
+                    }
+                    return film;
+                })
+            });
+            API.deleteFilm(filmId).then(() => refreshFilms())
+        };
+    }
 
     const patchFavoriteFactory = (refreshFilms) => {
         return (film) => {
@@ -129,7 +131,7 @@ function App() {
                             element={
                                 loggedIn ? <Body
                                     films={films}
-                                    deleteFilm={deleteFilm}
+                                    deleteFilmFactory={deleteFilmFactory}
                                     editFilmFactory={editFilmFactory}
                                     patchFavoriteFactory={patchFavoriteFactory}
                                     setFilms={setFilms}
@@ -142,7 +144,7 @@ function App() {
                             element={
                                 loggedIn ? <Body
                                     films={films}
-                                    deleteFilm={deleteFilm}
+                                    deleteFilmFactory={deleteFilmFactory}
                                     editFilmFactory={editFilmFactory}
                                     patchFavoriteFactory={patchFavoriteFactory}
                                     filterSelected="All"
@@ -155,7 +157,7 @@ function App() {
                             element={
                                 loggedIn ? <Body
                                     films={films}
-                                    deleteFilm={deleteFilm}
+                                    deleteFilmFactory={deleteFilmFactory}
                                     editFilmFactory={editFilmFactory}
                                     patchFavoriteFactory={patchFavoriteFactory}
                                     filterSelected="Favorite"
@@ -168,7 +170,7 @@ function App() {
                             element={
                                 loggedIn ? <Body
                                     films={films}
-                                    deleteFilm={deleteFilm}
+                                    deleteFilmFactory={deleteFilmFactory}
                                     editFilmFactory={editFilmFactory}
                                     patchFavoriteFactory={patchFavoriteFactory}
                                     filterSelected="Best Rated"
@@ -181,7 +183,7 @@ function App() {
                             element={
                                 loggedIn ? <Body
                                     films={films}
-                                    deleteFilm={deleteFilm}
+                                    deleteFilmFactory={deleteFilmFactory}
                                     editFilmFactory={editFilmFactory}
                                     patchFavoriteFactory={patchFavoriteFactory}
                                     filterSelected="Seen Last Month"
@@ -194,7 +196,7 @@ function App() {
                             element={
                                 loggedIn ? <Body
                                     films={films}
-                                    deleteFilm={deleteFilm}
+                                    deleteFilmFactory={deleteFilmFactory}
                                     editFilmFactory={editFilmFactory}
                                     patchFavoriteFactory={patchFavoriteFactory}
                                     filterSelected="Unseen"

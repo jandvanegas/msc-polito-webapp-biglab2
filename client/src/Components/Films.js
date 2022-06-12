@@ -18,6 +18,7 @@ function Films(props) {
     }
     const patchFavorite = props.patchFavoriteFactory(getFilms)
     const editFilm = props.editFilmFactory(getFilms)
+    const deleteFim = props.deleteFilmFactory(getFilms)
 
     useEffect(() => {
         getFilms();
@@ -40,7 +41,7 @@ function Films(props) {
                     <FilmRow film={film}
                              patchFavorite={patchFavorite}
                              key={film.id}
-                             deleteFilm={props.deleteFilm}
+                             deleteFilm={deleteFim}
                              editFilm={editFilm}
                     />
                 ))}

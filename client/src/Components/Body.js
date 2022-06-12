@@ -23,7 +23,7 @@ function Body(props) {
                     <Films
                         films={props.films}
                         filterSelected={props.filterSelected}
-                        deleteFilm={props.deleteFilm}
+                        deleteFilmFactory={props.deleteFilmFactory}
                         setFilms={props.setFilms}
                         editFilmFactory={props.editFilmFactory}
                         patchFavoriteFactory={props.patchFavoriteFactory}
